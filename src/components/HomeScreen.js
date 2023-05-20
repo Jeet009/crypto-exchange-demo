@@ -9,10 +9,12 @@ import {
 import { NetworkUtilsProvider, useNetwork } from "../context/NetwrokContext";
 import { fetchUSDTPrice } from "../stores/ApiEndpoints";
 import { useNavigation } from "@react-navigation/native";
+import { observer, inject } from "mobx-react";
 
 const windowHeight = Dimensions.get("window").height;
 
-function HomeScreen() {
+const HomeScreen = () => {
+  // const { currentNetwork, switchNetwork, getSelectedNetwork } = NetworkStore;
   const [usdtPrice, setUsdtPrice] = useState("");
   const { currentNetwork, switchNetwork, getSelectedNetwork } = useNetwork();
   const navigation = useNavigation();
@@ -71,7 +73,9 @@ function HomeScreen() {
       </View>
     </View>
   );
-}
+};
+//   )
+// );
 
 export default HomeScreen;
 

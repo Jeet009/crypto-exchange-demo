@@ -8,86 +8,118 @@ import {
 } from "react-native";
 import Web3 from "web3";
 import { useNavigation } from "@react-navigation/native";
+import { useNetwork } from "../context/NetwrokContext";
+import { bitcoinTransaction } from "../stores/ApiEndpoints";
 
 const SendTransactionScreen = () => {
+  const [senderAddress, setSenderAddress] = useState("");
   const [receiverAddress, setReceiverAddress] = useState("");
   const [usdtAmount, setUsdtAmount] = useState("");
   const [success, setSuccess] = useState(false);
   const [transactionHash, setTransactionHash] = useState();
+  const { currentNetwork } = useNetwork();
 
   const navigation = useNavigation();
+  //     try {
+  //       const privateKeyBytes = new TextEncoder().encode(privateKey);
+  //       const transactionBytes = new Uint8Array(
+  //         Buffer.from(transactionData, "hex")
+  //       );
+
+  //       const signature = await Crypto.signMessageAsync(
+  //         privateKeyBytes,
+  //         transactionBytes
+  //       );
+
+  //       const signedTransactionHex = `${transactionData}${Buffer.from(
+  //         signature
+  //       ).toString("hex")}`;
+
+  //       return signedTransactionHex;
+  //     } catch (error) {
+  //       console.error("Error signing transaction:", error);
+  //     }
+  //   };
 
   const handleSendTransaction = async () => {
-    try {
-      const provider = await window.ethereum;
-      await provider.enable();
-      const web3 = new Web3(provider);
+    if (currentNetwork == "bitcoin") {
+      bitcoinTransaction().then((res) => {
+        setTransactionHash(res);
+        setSuccess(true);
+      });
+    } else {
+      try {
+        const provider = await window.ethereum;
+        await provider.enable();
+        const web3 = new Web3(provider);
 
-      const usdtContractAddress = "0x6a23C73810a2b940105E05096710ACb48211D972";
-      const usdtContractABI = [
-        {
-          constant: true,
-          inputs: [],
-          name: "name",
-          outputs: [
-            {
-              name: "",
-              type: "string",
-            },
-          ],
-          payable: false,
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          constant: false,
-          inputs: [
-            {
-              name: "_to",
-              type: "address",
-            },
-            {
-              name: "_value",
-              type: "uint256",
-            },
-          ],
-          name: "transfer",
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-            },
-          ],
-          payable: false,
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ];
+        const usdtContractAddress =
+          "0x6a23C73810a2b940105E05096710ACb48211D972";
+        const usdtContractABI = [
+          {
+            constant: true,
+            inputs: [],
+            name: "name",
+            outputs: [
+              {
+                name: "",
+                type: "string",
+              },
+            ],
+            payable: false,
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            constant: false,
+            inputs: [
+              {
+                name: "_to",
+                type: "address",
+              },
+              {
+                name: "_value",
+                type: "uint256",
+              },
+            ],
+            name: "transfer",
+            outputs: [
+              {
+                name: "",
+                type: "bool",
+              },
+            ],
+            payable: false,
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ];
 
-      const accounts = await web3.eth.getAccounts();
-      const senderAddress = accounts[0];
+        const accounts = await web3.eth.getAccounts();
+        const senderAddress = accounts[0];
 
-      const usdtContract = new web3.eth.Contract(
-        usdtContractABI,
-        usdtContractAddress
-      );
+        const usdtContract = new web3.eth.Contract(
+          usdtContractABI,
+          usdtContractAddress
+        );
 
-      const usdtDecimalPlaces = 6;
-      const usdtAmountInWei = web3.utils
-        .toWei(usdtAmount, `ether`)
-        .padEnd(usdtDecimalPlaces + 1, "0");
+        const usdtDecimalPlaces = 6;
+        const usdtAmountInWei = web3.utils
+          .toWei(usdtAmount, `ether`)
+          .padEnd(usdtDecimalPlaces + 1, "0");
 
-      const tx = await usdtContract.methods
-        .transfer(receiverAddress, usdtAmountInWei)
-        .send({
-          from: senderAddress,
-        });
+        const tx = await usdtContract.methods
+          .transfer(receiverAddress, usdtAmountInWei)
+          .send({
+            from: senderAddress,
+          });
 
-      console.log("Transaction Hash:", tx.transactionHash);
-      setTransactionHash(tx.transactionHash);
-      setSuccess(true);
-    } catch (error) {
-      console.error("Error sending transaction:", error);
+        console.log("Transaction Hash:", tx.transactionHash);
+        setTransactionHash(tx.transactionHash);
+        setSuccess(true);
+      } catch (error) {
+        console.error("Error sending transaction:", error);
+      }
     }
   };
 
@@ -114,8 +146,16 @@ const SendTransactionScreen = () => {
         onChangeText={setReceiverAddress}
         style={styles.TextInput}
       />
+      {currentNetwork == "bitcoin" && (
+        <TextInput
+          placeholder="Sender Address"
+          value={senderAddress}
+          onChangeText={setSenderAddress}
+          style={styles.TextInput}
+        />
+      )}
       <TextInput
-        placeholder="USDT Amount"
+        placeholder="Enter Amount"
         value={usdtAmount}
         onChangeText={setUsdtAmount}
         style={styles.TextInput}

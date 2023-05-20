@@ -6,10 +6,12 @@ import WalletScreen from "../components/WalletScreen";
 import { useNetwork } from "../context/NetwrokContext";
 import SendTransactionScreen from "../components/SendTransactionScreen";
 import TransactionHistoryScreen from "../components/TransactionHistoryScreen";
+import { observer, inject } from "mobx-react";
 
 const Stack = createStackNavigator();
 
 const Route = () => {
+  // const { currentNetwork } = NetworkStore;
   const { currentNetwork } = useNetwork();
 
   return (

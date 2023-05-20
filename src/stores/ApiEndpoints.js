@@ -31,3 +31,69 @@ export const fetchTransactionHistory = async () => {
     return null;
   }
 };
+
+export const importBitcoinWallet = async (privateKey) => {
+  try {
+    const apiUrl = `https://api.blockcypher.com/v1/btc/test3/addrs?token=edb1f8d0e00c49b2ba628ca2f06cd3b0`;
+
+    const importData = {
+      private: [privateKey],
+    };
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(importData),
+    });
+
+    if (response.ok) {
+      const walletData = await response.json();
+      console.log("Wallet imported:", walletData);
+      return walletData;
+    } else {
+      console.log("Error importing wallet:", response.status);
+    }
+  } catch (error) {
+    console.log("Error:", error.message);
+  }
+};
+
+export const bitcoinTransaction = async (privateKey) => {
+  try {
+    const apiUrl = `https://api.blockcypher.com/v1/btc/test3/txs/new?token=edb1f8d0e00c49b2ba628ca2f06cd3b0`;
+
+    const transactionData = {
+      inputs: [
+        {
+          addresses: [senderAddress],
+        },
+      ],
+      outputs: [
+        {
+          addresses: [receiverAddress],
+          value: usdtAmount,
+        },
+      ],
+    };
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(transactionData),
+    });
+
+    if (response.ok) {
+      const transaction = await response.json();
+      console.log("Transaction created:", transaction);
+      return transaction;
+    } else {
+      console.log("Error creating transaction:", response.status);
+    }
+  } catch (error) {
+    console.log("Error:", error.message);
+  }
+};
