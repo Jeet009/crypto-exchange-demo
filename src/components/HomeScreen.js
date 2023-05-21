@@ -9,73 +9,81 @@ import {
 import { NetworkUtilsProvider, useNetwork } from "../context/NetwrokContext";
 import { fetchUSDTPrice } from "../stores/ApiEndpoints";
 import { useNavigation } from "@react-navigation/native";
+// import NetworkStore from "../stores/NetworkStore";
 import { observer, inject } from "mobx-react";
 
 const windowHeight = Dimensions.get("window").height;
 
-const HomeScreen = () => {
-  // const { currentNetwork, switchNetwork, getSelectedNetwork } = NetworkStore;
-  const [usdtPrice, setUsdtPrice] = useState("");
-  const { currentNetwork, switchNetwork, getSelectedNetwork } = useNetwork();
-  const navigation = useNavigation();
+const HomeScreen = inject("NetworkStore")(
+  observer(({ NetworkStore }) => {
+    const [usdtPrice, setUsdtPrice] = useState("");
+    // const { currentNetwork, switchNetwork, getSelectedNetwork } = useNetwork();
+    console.log(NetworkStore);
+    const { currentNetwork, switchNetwork, getSelectedNetwork } = NetworkStore;
+    const navigation = useNavigation();
 
-  const selectedNetwork = getSelectedNetwork();
+    // const selectedNetwork = getSelectedNetwork();
 
-  const handleSwitchNetwork = (network) => {
-    switchNetwork(network);
-  };
-
-  useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const price = await fetchUSDTPrice(currentNetwork);
-        setUsdtPrice(price);
-      } catch (error) {
-        console.error("Error fetching USDT price:", error);
-      }
+    const handleSwitchNetwork = (network) => {
+      switchNetwork(network);
     };
 
-    fetchPrice();
-  }, [switchNetwork]);
+    useEffect(() => {
+      const fetchPrice = async () => {
+        try {
+          const price = await fetchUSDTPrice(currentNetwork);
+          setUsdtPrice(price);
+        } catch (error) {
+          console.error("Error fetching USDT price:", error);
+        }
+      };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.infoContainer}>
-        {/* <Text> {selectedNetwork.currency}</Text> */}
-        <Text style={styles.price}>
-          {" "}
-          {selectedNetwork.currency} / $ {usdtPrice}
-        </Text>
+      fetchPrice();
+    }, [switchNetwork]);
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.infoContainer}>
+          {/* <Text> {selectedNetwork.currency}</Text> */}
+          {currentNetwork == "polygon" ? (
+            <Text style={styles.price}>
+              {" "}
+              {JSON.stringify(getSelectedNetwork(), null, 2)} / $ {usdtPrice}
+            </Text>
+          ) : (
+            <Text style={styles.price}>
+              {getSelectedNetwork.name} / $ {usdtPrice}
+            </Text>
+          )}
+        </View>
+        <View>
+          <TouchableOpacity
+            onPress={() =>
+              handleSwitchNetwork(
+                currentNetwork == "bitcoin" ? "polygon" : "bitcoin"
+              )
+            }
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>Change the network</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Wallet")}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>Check Wallet</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("TransactionHistoryScreen")}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>CHECK TRANSACTTION HISTORY</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View>
-        <TouchableOpacity
-          onPress={() =>
-            handleSwitchNetwork(
-              currentNetwork == "bitcoin" ? "polygon" : "bitcoin"
-            )
-          }
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Change the network</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Wallet")}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Check Wallet</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("TransactionHistoryScreen")}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>CHECK TRANSACTTION HISTORY</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-//   )
-// );
+    );
+  })
+);
 
 export default HomeScreen;
 

@@ -3,16 +3,17 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import HomeScreen from "../components/HomeScreen";
 import WalletScreen from "../components/WalletScreen";
-import { useNetwork } from "../context/NetwrokContext";
+// import { useNetwork } from "../context/NetwrokContext";
 import SendTransactionScreen from "../components/SendTransactionScreen";
 import TransactionHistoryScreen from "../components/TransactionHistoryScreen";
-import { observer, inject } from "mobx-react";
+import NetworkStore from "../stores/NetworkStore";
+import { observer } from "mobx-react";
 
 const Stack = createStackNavigator();
 
-const Route = () => {
-  // const { currentNetwork } = NetworkStore;
-  const { currentNetwork } = useNetwork();
+const Route = observer(() => {
+  // const { currentNetwork } = useNetwork();
+  const { currentNetwork } = NetworkStore;
 
   return (
     <NavigationContainer>
@@ -93,6 +94,6 @@ const Route = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
+});
 
 export default Route;
